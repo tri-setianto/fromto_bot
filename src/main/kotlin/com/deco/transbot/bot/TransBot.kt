@@ -15,35 +15,10 @@ import org.telegram.telegrambots.api.objects.Message
 class TransBot : TelegramLongPollingBot() {
 
   @Autowired
-  lateinit var userDao: JooqUserManager
-  @Autowired
-  lateinit var userConfigDao: UserConfigDao
+  lateinit var updateHandler: UpdateHandler
 
   override fun onUpdateReceived(update: Update) {
-    if (update.hasMessage() && update.message.hasText()) {
-      val translator = Translator()
-      val userName = update.message.from.userName ?: ""
-      val userConfig = userConfigDao.getById(userName)
-      val langSorce = userConfig.langSource ?: "en"
-      val langTarget = userConfig.langTarget ?: "id"
-      val word = translator.callUrlAndParseResult(
-        langSorce, langTarget, update.message.text)
-      var aut = "not user"
-      val autUser = userDao.findById(userName)
-      if (autUser != "") {
-        aut = "user"
-      }
-      val message = SendMessage()
-        .setChatId(update.message.chatId)
-        .setText("$aut $word")
-      try {
-        this.sendMessage(message) // Call method to send the message
-      } catch (e: TelegramApiException) {
-        println("yoi")
-        e.printStackTrace()
-      }
-
-    }
+    updateHandler.handle(this, update)
   }
 
   override fun getBotToken(): String {
@@ -53,8 +28,4 @@ class TransBot : TelegramLongPollingBot() {
   override fun getBotUsername(): String {
     return "traslateBot"
   }
-
-  private fun hanleMessage(message: Message) {
-  }
-
 }

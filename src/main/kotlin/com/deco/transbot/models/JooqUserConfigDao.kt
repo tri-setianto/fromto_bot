@@ -34,12 +34,11 @@ constructor(val jooq: DSLContext): UserConfigDao {
       .execute()
   }
 
-  override fun updateConfig(userName: String, langSource: String,
-                            langTarget: String) {
+  override fun updateConfig(config: ConfigUser) {
     this.jooq.update(CONFIG_USER)
-      .set(CONFIG_USER.LANG_SOURCE, langSource)
-      .set(CONFIG_USER.LANG_TARGET, langTarget)
-      .where(CONFIG_USER.USERNAME.eq(userName))
+      .set(CONFIG_USER.LANG_SOURCE, config.langSource)
+      .set(CONFIG_USER.LANG_TARGET, config.langTarget)
+      .where(CONFIG_USER.USERNAME.eq(config.username))
       .execute()
   }
 
