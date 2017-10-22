@@ -1,6 +1,7 @@
 package com.deco.transbot
 
 import com.deco.transbot.bot.TransBot
+import com.deco.transbot.bot.TransBotWebHook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
@@ -13,6 +14,8 @@ class BotRegister : CommandLineRunner {
 
   @Autowired
   private lateinit var transbot: TransBot
+  @Autowired
+  private lateinit var transbot2: TransBotWebHook
 
   override fun run(vararg args: String?) {
 

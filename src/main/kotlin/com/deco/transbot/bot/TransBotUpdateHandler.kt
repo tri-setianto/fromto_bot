@@ -24,14 +24,15 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
       val message = SendMessage()
         .setChatId(update.message.chatId)
 
-      if (isCommand(update.message.text)) {
-        message.text = this.handleCommand(update.message)
-      } else {
-        if (userName != null) {
-          message.text = this.translate(userName, update.message.text)
+      if (userName != null) {
+        this.createUserConfigIfNotAvailable(userName)
+        if (isCommand(update.message.text)) {
+          message.text = this.handleCommand(update.message)
         } else {
-          message.text = "create username"
+          message.text = this.translate(userName, update.message.text)
         }
+      } else {
+        message.text = "create username"
       }
 
 //      var aut = "not user"
@@ -57,6 +58,7 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
   private fun handleCommand(message: Message): String {
     val arrText = message.text.split(Regex("\\s+"))
     val command = arrText[0]
+
     return when (command) {
       "/switch", "/switch@traslateBot" -> {
         val configUser = this.userConfigDao.getById(message.from.userName)
@@ -65,7 +67,16 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
         ))
         "switch to ${configUser.langTarget} - ${configUser.langSource}"
       }
-      else -> "command tidak tersedia"
+      "/translate", "/translate@traslateBot" -> {
+        if (message.isReply) {
+          return this.translate(message.from.userName, message.replyToMessage.text)
+        }
+        "cannot read reply"
+      }
+      "/set", "/set@translateBot" -> {
+        ""
+      }
+      else -> if (message.chat.isUserChat) "command tidak tersedia" else ""
     }
   }
 
@@ -93,5 +104,12 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
     }
     return translator.callUrlAndParseResult(
       langSource, langTarget, text)
+  }
+
+  private fun createUserConfigIfNotAvailable(userName: String) {
+    val config = this.userConfigDao.getById(userName)
+    if (config.username == null) {
+      this.userConfigDao.createConfig(ConfigUser(userName, "en", "id"))
+    }
   }
 }
