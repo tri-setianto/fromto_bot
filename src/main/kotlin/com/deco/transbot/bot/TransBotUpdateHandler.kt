@@ -155,18 +155,9 @@ constructor(val userDao: UserManager,
 
   private fun translate(userName: String, text: String): String {
     val translator = Translator()
-    val langSource: String
-    val langTarget: String
     val userConfig = userConfigDao.getById(userName)
-    if (userConfig.username != null) {
-      langSource = userConfig.langSource ?: "en"
-      langTarget = userConfig.langTarget ?: "id"
-    } else {
-      userConfigDao.createConfig(ConfigUser(userName, "en", "id"))
-      val newUserConfig = userConfigDao.getById(userName)
-      langSource = newUserConfig.langSource ?: "en"
-      langTarget = newUserConfig.langTarget ?: "id"
-    }
+    val langSource = userConfig.langSource ?: "en"
+    val langTarget = userConfig.langTarget ?: "id"
     return translator.callUrlAndParseResult(
       langSource, langTarget, text)
   }
