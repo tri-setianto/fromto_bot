@@ -14,8 +14,6 @@ class BotRegister : CommandLineRunner {
 
   @Autowired
   private lateinit var transbot: TransBot
-  @Autowired
-  private lateinit var transbot2: TransBotWebHook
 
   override fun run(vararg args: String?) {
 

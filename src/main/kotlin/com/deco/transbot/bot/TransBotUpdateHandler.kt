@@ -27,27 +27,19 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
       if (userName != null) {
         this.createUserConfigIfNotAvailable(userName)
         if (isCommand(update.message.text)) {
-          message.text = this.handleCommand(update.message)
+          this.handleCommand(sender, update.message)
         } else {
-          message.text = this.translate(userName, update.message.text)
+          this.handleNonCommand(sender, update.message)
         }
       } else {
         message.text = "create username"
+        try {
+          sender.sendMessage(message) // Call method to send the message
+        } catch (e: TelegramApiException) {
+          println("yoi")
+          e.printStackTrace()
+        }
       }
-
-//      var aut = "not user"
-//      val autUser = userDao.findById(userName)
-//      if (autUser != "") {
-//        aut = "user"
-//      }
-
-      try {
-        sender.sendMessage(message) // Call method to send the message
-      } catch (e: TelegramApiException) {
-        println("yoi")
-        e.printStackTrace()
-      }
-
     }
   }
 
@@ -55,36 +47,65 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
     return text[0] == '/'
   }
 
-  private fun handleCommand(message: Message): String {
-    val arrText = message.text.split(Regex("\\s+"))
+  private fun handleCommand(sender: AbsSender, message: Message) {
+    val arrText = message.text.split(Regex("\\s+|\\n"))
     val command = arrText[0]
 
-    return when (command) {
+    fun send(text: String) {
+      try {
+        val sendMessage = SendMessage()
+          .setChatId(message.chatId)
+          .setReplyToMessageId(message.messageId)
+          .setText(text)
+        sender.execute(sendMessage)
+      } catch (e: TelegramApiException) {
+        e.printStackTrace()
+      }
+    }
+
+    when (command) {
       "/switch", "/switch@traslateBot" -> {
         val configUser = this.userConfigDao.getById(message.from.userName)
         this.userConfigDao.updateConfig(ConfigUser(
           message.from.userName, configUser.langTarget, configUser.langSource
         ))
-        "switch to ${configUser.langTarget} - ${configUser.langSource}"
+        send("switch to ${configUser.langTarget} - ${configUser.langSource}")
       }
       "/translate", "/translate@traslateBot" -> {
         if (message.isReply) {
-          return this.translate(message.from.userName, message.replyToMessage.text)
+          send(this.translate(message.from.userName,
+            message.replyToMessage.text))
+        } else {
+          send("cannot read reply")
         }
-        "cannot read reply"
       }
       "/set", "/set@translateBot" -> {
-        ""
+        send("set not implemented yet")
       }
-      else -> if (message.chat.isUserChat) "command tidak tersedia" else ""
+      else -> if (message.chat.isUserChat) { send("command tidak tersedia") }
     }
   }
 
-  private fun handleNonCommand() {
 
+  private fun handleNonCommand(sender: AbsSender, message: Message) {
+    fun send(text: String) {
+      try {
+        val sendMessage = SendMessage()
+          .setChatId(message.chatId)
+          .setReplyToMessageId(message.messageId)
+          .setText(text)
+        sender.execute(sendMessage)
+      } catch (e: TelegramApiException) {
+        e.printStackTrace()
+      }
+    }
+    if (message.chat.isUserChat) {
+      send(this.translate(message.from.userName, message.text))
+    }
   }
 
-  private fun sendMessage(sender: AbsSender, text: String) {
+
+  private fun sendText(sender: AbsSender, text: String) {
 
   }
 
