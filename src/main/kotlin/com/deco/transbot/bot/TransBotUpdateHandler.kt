@@ -35,12 +35,14 @@ constructor(val userDao: UserManager,
           this.handleNonCommand(sender, update.message)
         }
       } else {
-        message.text = "create username"
-        try {
-          sender.sendMessage(message) // Call method to send the message
-        } catch (e: TelegramApiException) {
-          println("yoi")
-          e.printStackTrace()
+        if (update.message.chat.isUserChat) {
+          message.text = "create username"
+          try {
+            sender.sendMessage(message) // Call method to send the message
+          } catch (e: TelegramApiException) {
+            println("yoi")
+            e.printStackTrace()
+          }
         }
       }
     }
@@ -53,6 +55,7 @@ constructor(val userDao: UserManager,
   private fun handleCommand(sender: AbsSender, message: Message) {
     val arrText = message.text.split(Regex("\\s+|\\n"))
     val command = arrText[0]
+    val userName = message.from.userName
 
     fun send(text: String) {
       try {
@@ -76,8 +79,7 @@ constructor(val userDao: UserManager,
       }
       "/translate", "/translate@traslateBot" -> {
         if (message.isReply) {
-          send(this.translate(message.from.userName,
-            message.replyToMessage.text))
+          send(this.translate(userName, message.replyToMessage.text))
         } else {
           send("cannot read reply")
         }
@@ -102,6 +104,27 @@ constructor(val userDao: UserManager,
             "\n\n/set id_bahasa_sumber id_bahasa_target\n\n" +
             "contoh: /set en id")
         }
+      }
+      "/me", "/me@traslateBot" -> {
+        val config = userConfigDao.getById(userName)
+        val langSource = languageDao.fetchOneById(config.langSource)
+        val langTarget = languageDao.fetchOneById(config.langTarget)
+        send("""
+            useername : $userName
+            langSource : ${langSource.id} (${langSource.name})
+            langTarget : ${langTarget.id} (${langTarget.name})
+        """.trimIndent())
+      }
+      "/help", "help@traslateBot" -> {
+        send("""
+              Available Command
+              /switch - tukar bahasa
+              /translate - terjemahkan pesan yang di reply
+              /set - atur bahasa yang digunakan
+              /me - tampilkan info pengguna
+              /help - tampilkan pesan ini
+          """.trimIndent()
+        )
       }
       else -> if (message.chat.isUserChat) { send("command tidak tersedia") }
     }
