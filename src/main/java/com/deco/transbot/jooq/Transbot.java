@@ -5,6 +5,7 @@ package com.deco.transbot.jooq;
 
 
 import com.deco.transbot.jooq.tables.ConfigUser;
+import com.deco.transbot.jooq.tables.Laguage;
 import com.deco.transbot.jooq.tables.User;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Transbot extends SchemaImpl {
 
-    private static final long serialVersionUID = -195054356;
+    private static final long serialVersionUID = -1122025730;
 
     /**
      * The reference instance of <code>transbot</code>
@@ -42,6 +43,11 @@ public class Transbot extends SchemaImpl {
      * The table <code>transbot.config_user</code>.
      */
     public final ConfigUser CONFIG_USER = com.deco.transbot.jooq.tables.ConfigUser.CONFIG_USER;
+
+    /**
+     * The table <code>transbot.laguage</code>.
+     */
+    public final Laguage LAGUAGE = com.deco.transbot.jooq.tables.Laguage.LAGUAGE;
 
     /**
      * The table <code>transbot.user</code>.
@@ -74,6 +80,7 @@ public class Transbot extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             ConfigUser.CONFIG_USER,
+            Laguage.LAGUAGE,
             User.USER);
     }
 }

@@ -1,6 +1,7 @@
 package com.deco.transbot.bot
 
 import com.deco.transbot.jooq.tables.pojos.ConfigUser
+import com.deco.transbot.models.LanguageDao
 import com.deco.transbot.models.UserConfigDao
 import com.deco.transbot.models.UserManager
 import com.deco.transbot.translator.Translator
@@ -14,8 +15,10 @@ import org.telegram.telegrambots.exceptions.TelegramApiException
 
 @Component
 class TransBotUpdateHandler @Autowired
-constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
-  : UpdateHandler {
+constructor(val userDao: UserManager,
+            val userConfigDao: UserConfigDao,
+            val languageDao: LanguageDao
+) : UpdateHandler {
 
   override fun handle(sender: AbsSender, update: Update) {
     println(update)
@@ -79,8 +82,26 @@ constructor(val userDao: UserManager, val userConfigDao: UserConfigDao)
           send("cannot read reply")
         }
       }
-      "/set", "/set@translateBot" -> {
-        send("set not implemented yet")
+      "/set", "/set@traslateBot" -> {
+        if (arrText.size == 3) {
+          when {
+              languageDao.fetchOneById(arrText[1]).id == null -> send(
+                "id bahasa ${arrText[1]} tidak di dukung")
+              languageDao.fetchOneById(arrText[2]).id == null -> send(
+                "id bahasa ${arrText[1]} tidak di dukung")
+              else -> {
+                userConfigDao.updateConfig(ConfigUser(message.from.userName,
+                  arrText[1], arrText[2]))
+                val sourceName = languageDao.fetchOneById(arrText[1]).name
+                val targetName = languageDao.fetchOneById(arrText[2]).name
+                send("set bahasa ke $sourceName -> $targetName")
+              }
+          }
+        } else {
+          send("format penulisan salah, gunakan format penulisan dibawah ini:" +
+            "\n\n/set id_bahasa_sumber id_bahasa_target\n\n" +
+            "contoh: /set en id")
+        }
       }
       else -> if (message.chat.isUserChat) { send("command tidak tersedia") }
     }
