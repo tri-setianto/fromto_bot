@@ -5,11 +5,18 @@ import com.deco.transbot.models.LanguageDao
 import com.deco.transbot.models.UserConfigDao
 import com.deco.transbot.models.UserManager
 import com.deco.transbot.translator.Translator
+import com.sun.org.apache.xml.internal.serializer.utils.Utils.messages
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.telegram.telegrambots.api.methods.AnswerInlineQuery
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
+import org.telegram.telegrambots.api.objects.inlinequery.InlineQuery
+import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.InputMessageContent
+import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.InputTextMessageContent
+import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResult
+import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResultArticle
 import org.telegram.telegrambots.bots.AbsSender
 import org.telegram.telegrambots.exceptions.TelegramApiException
 
@@ -26,8 +33,9 @@ constructor(val userDao: UserManager,
       println("###############################")
       println(update.message.from?.userName)
       println(update.message.text)
-      println(update.message.isReply)
-      println(update.message.chat.isUserChat)
+      println("is reply : " + update.message.isReply)
+      println("is private : " + update.message.chat.isUserChat)
+      println("text : " + update.message)
       val userName = update.message.from.userName
       val message = SendMessage()
         .setChatId(update.message.chatId)
@@ -49,6 +57,12 @@ constructor(val userDao: UserManager,
             e.printStackTrace()
           }
         }
+      }
+    } else if (update.hasInlineQuery()) {
+      if (update.inlineQuery.from.userName != null) {
+        this.createUserConfigIfNotAvailable(update.inlineQuery.from.userName)
+        println(update)
+        this.handleInlineQuery(sender, update.inlineQuery)
       }
     }
   }
@@ -167,6 +181,26 @@ constructor(val userDao: UserManager,
   }
 
 
+  private fun handleInlineQuery(sender: AbsSender, query: InlineQuery) {
+    val userName = query.from.userName
+    val config = userConfigDao.getById(userName)
+
+    val article = InlineQueryResultArticle()
+    article.id = "1"
+    article.title = "Traslate"
+    article.description = "from ${config.langSource} to ${config.langTarget}"
+
+    val text = InputTextMessageContent()
+      .disableWebPagePreview()
+    text.messageText = translate(userName, query.query)
+    article.inputMessageContent = text
+    val tes = AnswerInlineQuery()
+      .setInlineQueryId(query.id)
+      .setResults(article)
+    sender.execute(tes)
+  }
+
+
   private fun sendText(sender: AbsSender, text: String) {
 
   }
@@ -189,6 +223,7 @@ constructor(val userDao: UserManager,
     val config = this.userConfigDao.getById(userName)
     if (config.username == null) {
       this.userConfigDao.createConfig(ConfigUser(userName, "en", "id"))
+      this.userConfigDao.createConfig(ConfigUser())
     }
   }
 }
