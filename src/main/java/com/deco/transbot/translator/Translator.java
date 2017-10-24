@@ -9,13 +9,13 @@ import org.json.JSONArray;
 
 public class Translator {
 
-//    public static void main(String[] args) throws Exception {
-//
-//        Translator http = new Translator();
-//        String word = http.callUrlAndParseResult("en", "hi", "hello");
-//
-//        System.out.println(word);
-//    }
+    public static void main(String[] args) throws Exception {
+
+        Translator http = new Translator();
+        String word = http.callUrlAndParseResult("en", "hi", "hello");
+
+        System.out.println(word);
+    }
 
     public String callUrlAndParseResult(String langFrom,
                                         String langTo, String word
@@ -44,14 +44,7 @@ public class Translator {
         return parseResult(response.toString());
     }
 
-    private String parseResult(String inputJson) throws Exception
-    {
-  /*
-   * inputJson for word 'hello' translated to language Hindi from English-
-   * [[["नमस्ते","hello",,,1]],,"en"]
-   * We have to get 'नमस्ते ' from this json.
-   */
-
+    private String parseResult(String inputJson) throws Exception {
         JSONArray jsonArray = new JSONArray(inputJson);
         JSONArray jsonArray2 = (JSONArray) jsonArray.get(0);
         JSONArray jsonArray3 = (JSONArray) jsonArray2.get(0);

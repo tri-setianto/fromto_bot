@@ -48,7 +48,7 @@ repositories {
 }
 
 springBoot {
-  mainClass = "com.deco.transbot.TransbotApplication"
+  mainClass = "com.deco.transbot.TransbotApplicationKt"
 }
 
 dependencies {
@@ -87,7 +87,9 @@ def xml = new MarkupBuilder(writer)
     generate([:]) {
       pojos true
       daos true
-    }
+    }//GenerationTool.generate(
+//  JAXB.unmarshal(new StringReader(writer.toString()), org.jooq.util.jaxb.Configuration.class)
+//)
     target() {
       packageName('com.deco.transbot.jooq')
       directory('src/main/java')
