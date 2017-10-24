@@ -1,5 +1,6 @@
 package com.deco.transbot
 
+import com.deco.transbot.bot.FromToBot
 import com.deco.transbot.bot.Tl1Bot
 import com.deco.transbot.bot.TransBot
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,18 +13,21 @@ import org.telegram.telegrambots.exceptions.TelegramApiException
 
 @SpringBootApplication
 class TransbotApplication : CommandLineRunner{
+//  @Autowired
+//  private lateinit var transbot: TransBot
+//  @Autowired
+//  private lateinit var tl1bot: Tl1Bot
   @Autowired
-  private lateinit var transbot: TransBot
-  @Autowired
-  private lateinit var tl1bot: Tl1Bot
+  private lateinit var fromToBot: FromToBot
 
   override fun run(vararg args: String?) {
 
     val botApi = TelegramBotsApi()
 
     try {
-      botApi.registerBot(tl1bot)
-      botApi.registerBot(transbot)
+      // botApi.registerBot(tl1bot)
+      // botApi.registerBot(transbot)
+      botApi.registerBot(fromToBot)
     } catch (e: TelegramApiException) {
       e.printStackTrace()
     }

@@ -16,7 +16,7 @@ class FromToBot : TelegramLongPollingBot() {
   }
 
   override fun getBotUsername(): String {
-    return "@fromto_bot"
+    return "fromto_bot"
   }
 
   override fun onUpdateReceived(update: Update) {

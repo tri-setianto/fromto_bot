@@ -18,6 +18,8 @@ import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.Inp
 import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResult
 import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResultArticle
 import org.telegram.telegrambots.bots.AbsSender
+import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.bots.TelegramWebhookBot
 import org.telegram.telegrambots.exceptions.TelegramApiException
 
 @Component
@@ -26,8 +28,7 @@ constructor(val userDao: UserManager,
             val userConfigDao: UserConfigDao,
             val languageDao: LanguageDao
 ) : UpdateHandler {
-
-  override fun handle(sender: AbsSender, update: Update) {
+  override fun handle(sender: TelegramLongPollingBot, update: Update) {
     //println(update)
     if (update.hasMessage() && update.message.hasText()) {
       println("###############################")
@@ -43,7 +44,7 @@ constructor(val userDao: UserManager,
       if (userName != null) {
         this.createUserConfigIfNotAvailable(userName)
         if (isCommand(update.message.text)) {
-          this.handleCommand(sender, update.message)
+          this.handleCommand(sender, sender.botUsername ,update.message)
         } else {
           this.handleNonCommand(sender, update.message)
         }
@@ -67,11 +68,16 @@ constructor(val userDao: UserManager,
     }
   }
 
+  override fun handle(sender: TelegramWebhookBot, update: Update) {
+
+  }
+
   private fun isCommand(text: String): Boolean {
     return text[0] == '/'
   }
 
-  private fun handleCommand(sender: AbsSender, message: Message) {
+  private fun handleCommand(sender: AbsSender, botUsername: String,
+                            message: Message) {
     val arrText = message.text.split(Regex("\\s+|\\n"))
     val command = arrText[0]
     val userName = message.from.userName
@@ -89,14 +95,14 @@ constructor(val userDao: UserManager,
     }
 
     when (command) {
-      "/switch", "/switch@traslateBot" -> {
+      "/switch", "/switch@$botUsername" -> {
         val configUser = this.userConfigDao.getById(message.from.userName)
         this.userConfigDao.updateConfig(ConfigUser(
           message.from.userName, configUser.langTarget, configUser.langSource
         ))
         send("switch to ${configUser.langTarget} - ${configUser.langSource}")
       }
-      "/translate", "/translate@traslateBot" -> {
+      "/translate", "/translate@$botUsername" -> {
         if (message.isReply) {
           when {
               arrText.size == 1 -> send(this.translate(userName,
@@ -112,7 +118,7 @@ constructor(val userDao: UserManager,
           send("cannot read reply")
         }
       }
-      "/set", "/set@traslateBot" -> {
+      "/set", "/set@$botUsername" -> {
         if (arrText.size == 3) {
           when {
               languageDao.fetchOneById(arrText[1]).id == null -> send(
@@ -133,7 +139,7 @@ constructor(val userDao: UserManager,
             "contoh: /set en id")
         }
       }
-      "/me", "/me@traslateBot" -> {
+      "/me", "/me@$botUsername" -> {
         val config = userConfigDao.getById(userName)
         val langSource = languageDao.fetchOneById(config.langSource)
         val langTarget = languageDao.fetchOneById(config.langTarget)
@@ -143,7 +149,7 @@ constructor(val userDao: UserManager,
             langTarget : ${langTarget.id} (${langTarget.name})
         """.trimIndent())
       }
-      "/help", "/help@traslateBot" -> {
+      "/help", "/help@$botUsername" -> {
         send("""
               Available Command
               /switch - tukar bahasa
