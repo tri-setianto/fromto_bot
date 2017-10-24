@@ -21,8 +21,13 @@ constructor(val userDao: UserManager,
 ) : UpdateHandler {
 
   override fun handle(sender: AbsSender, update: Update) {
-    println(update)
+    //println(update)
     if (update.hasMessage() && update.message.hasText()) {
+      println("###############################")
+      println(update.message.from?.userName)
+      println(update.message.text)
+      println(update.message.isReply)
+      println(update.message.chat.isUserChat)
       val userName = update.message.from.userName
       val message = SendMessage()
         .setChatId(update.message.chatId)
@@ -79,7 +84,16 @@ constructor(val userDao: UserManager,
       }
       "/translate", "/translate@traslateBot" -> {
         if (message.isReply) {
-          send(this.translate(userName, message.replyToMessage.text))
+          when {
+              arrText.size == 1 -> send(this.translate(userName,
+                message.replyToMessage.text))
+              arrText.size == 2 -> {
+                send(this.translate(message.replyToMessage.text, arrText[1],
+                  userConfigDao.getById(userName).langTarget))
+              }
+              arrText.size >= 3 -> send(this.translate(
+                message.replyToMessage.text, arrText[1], arrText[2]))
+          }
         } else {
           send("cannot read reply")
         }
@@ -115,12 +129,16 @@ constructor(val userDao: UserManager,
             langTarget : ${langTarget.id} (${langTarget.name})
         """.trimIndent())
       }
-      "/help", "help@traslateBot" -> {
+      "/help", "/help@traslateBot" -> {
         send("""
               Available Command
               /switch - tukar bahasa
               /translate - terjemahkan pesan yang di reply
+                - replay pesan yang akan di terjemahkan dan gunakan comman dibawah ini
+                - /translate
+                - atau gunakan inline setting: /translate id en
               /set - atur bahasa yang digunakan
+                - contoh: /set id en
               /me - tampilkan info pengguna
               /help - tampilkan pesan ini
           """.trimIndent()
@@ -153,14 +171,19 @@ constructor(val userDao: UserManager,
 
   }
 
+
   private fun translate(userName: String, text: String): String {
-    val translator = Translator()
     val userConfig = userConfigDao.getById(userName)
     val langSource = userConfig.langSource ?: "en"
     val langTarget = userConfig.langTarget ?: "id"
-    return translator.callUrlAndParseResult(
-      langSource, langTarget, text)
+    return this.translate(text, langSource, langTarget)
   }
+
+  private fun translate(text: String, source: String, target: String): String {
+    val translator = Translator()
+    return translator.callUrlAndParseResult(source, target, text)
+  }
+
 
   private fun createUserConfigIfNotAvailable(userName: String) {
     val config = this.userConfigDao.getById(userName)
