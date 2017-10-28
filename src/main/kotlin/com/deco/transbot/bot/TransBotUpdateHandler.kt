@@ -1,11 +1,11 @@
 package com.deco.transbot.bot
 
+import com.deco.transbot.SuportLaguage
 import com.deco.transbot.jooq.tables.pojos.ConfigUser
 import com.deco.transbot.models.LanguageDao
 import com.deco.transbot.models.UserConfigDao
 import com.deco.transbot.models.UserManager
 import com.deco.transbot.translator.Translator
-import com.sun.org.apache.xml.internal.serializer.utils.Utils.messages
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.api.methods.AnswerInlineQuery
@@ -13,9 +13,7 @@ import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.api.objects.inlinequery.InlineQuery
-import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.InputMessageContent
 import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.InputTextMessageContent
-import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResult
 import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResultArticle
 import org.telegram.telegrambots.bots.AbsSender
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -36,7 +34,7 @@ constructor(val userDao: UserManager,
       println(update.message.text)
       println("is reply : " + update.message.isReply)
       println("is private : " + update.message.chat.isUserChat)
-      println("text : " + update.message)
+      println("text : " + update.message.text)
       val userName = update.message.from.userName
       val message = SendMessage()
         .setChatId(update.message.chatId)
@@ -149,6 +147,7 @@ constructor(val userDao: UserManager,
             langTarget : ${langTarget.id} (${langTarget.name})
         """.trimIndent())
       }
+      "/language", "/language@$botUsername" -> send(SuportLaguage.getLanguage())
       "/help", "/help@$botUsername" -> {
         send("""
               Available Command
@@ -198,7 +197,8 @@ constructor(val userDao: UserManager,
 
     val text = InputTextMessageContent()
       .disableWebPagePreview()
-    text.messageText = translate(userName, query.query)
+      .setMessageText(translate(query.query, config.langSource,
+        config.langTarget))
     article.inputMessageContent = text
     val tes = AnswerInlineQuery()
       .setInlineQueryId(query.id)
@@ -219,9 +219,11 @@ constructor(val userDao: UserManager,
     return this.translate(text, langSource, langTarget)
   }
 
+
   private fun translate(text: String, source: String, target: String): String {
     val translator = Translator()
-    return translator.callUrlAndParseResult(source, target, text)
+    val result = translator.callUrlAndParseResult(source, target, text)
+    return result
   }
 
 

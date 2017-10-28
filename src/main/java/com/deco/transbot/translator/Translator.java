@@ -20,13 +20,14 @@ public class Translator {
   public String callUrlAndParseResult(String langFrom,
     String langTo, String word
   ) throws Exception {
-
+    String encodWord = GoogleTraslateEncoder.encode(word);
+     System.out.println("in translator: " + word);
     String url = "https://translate.googleapis.com/translate_a/single?" +
       "client=gtx&" +
       "sl=" + langFrom +
       "&tl=" + langTo +
-      "&dt=t&q=" + URLEncoder.encode(word, "UTF-8");
-
+      "&dt=t&q=" + URLEncoder.encode(encodWord, "UTF-8");
+    System.out.println(url);
     URL obj = new URL(url);
     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
     con.setRequestProperty("User-Agent", "Mozilla/5.0");
@@ -40,8 +41,9 @@ public class Translator {
       response.append(inputLine);
     }
     in.close();
-    System.out.println(response.toString());
-    return parseResult(response.toString());
+     System.out.println(response.toString());
+    String respon = parseResult(response.toString());
+    return GoogleTraslateEncoder.decode(respon.replace("\u200B", ""));
   }
 
   private String parseResult(String inputJson) throws Exception {
