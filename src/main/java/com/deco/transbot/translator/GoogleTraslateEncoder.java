@@ -17,7 +17,7 @@ public class GoogleTraslateEncoder {
     {"*", " xzz2a"},
     {"+", " xzz2b"},
     {",", " xzz2c"},
-    {"-", " xzz2d"},
+    // {"-", " xzz2d"},
     {".", " xzz2e"},
     {"/", " xzz2f"},
     {":", " xzz3a"},

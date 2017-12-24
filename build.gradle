@@ -71,7 +71,7 @@ def xml = new MarkupBuilder(writer)
     driver('com.mysql.jdbc.Driver')
     url('jdbc:mysql://localhost:3306/transbot')
     user('root')
-    password('')
+    password('Timeline10')
     database('transbot')
     schema('transbot')
   }

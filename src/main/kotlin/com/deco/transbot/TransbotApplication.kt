@@ -15,10 +15,10 @@ import org.telegram.telegrambots.exceptions.TelegramApiException
 class TransbotApplication : CommandLineRunner{
 //  @Autowired
 //  private lateinit var transbot: TransBot
-//  @Autowired
-//  private lateinit var tl1bot: Tl1Bot
   @Autowired
-  private lateinit var fromToBot: FromToBot
+  private lateinit var tl1bot: Tl1Bot
+//  @Autowired
+//  private lateinit var fromToBot: FromToBot
 
   override fun run(vararg args: String?) {
 
@@ -27,10 +27,11 @@ class TransbotApplication : CommandLineRunner{
     try {
       // botApi.registerBot(tl1bot)
       // botApi.registerBot(transbot)
-      botApi.registerBot(fromToBot)
+      botApi.registerBot(tl1bot)
     } catch (e: TelegramApiException) {
       e.printStackTrace()
     }
+
   }
 
   init {
