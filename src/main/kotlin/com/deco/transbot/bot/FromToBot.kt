@@ -1,6 +1,7 @@
 package com.deco.transbot.bot
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -9,14 +10,16 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 class FromToBot : TelegramLongPollingBot() {
   @Autowired
   lateinit var updateHandler: UpdateHandler
+  @Autowired
+  private lateinit var env: Environment
 
 
   override fun getBotToken(): String {
-    return "412051876:AAGBXCv5r96ZqRFa9Q9BGG0DdZ1SN-2qroE"
+    return env.getProperty("fromtobot.bot.token")
   }
 
   override fun getBotUsername(): String {
-    return "fromto_bot"
+    return env.getProperty("fromtobot.bot.token")
   }
 
   override fun onUpdateReceived(update: Update) {
