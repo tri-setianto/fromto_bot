@@ -19,8 +19,6 @@ class TransbotApplication : CommandLineRunner{
     val botApi = TelegramBotsApi()
 
     try {
-      // botApi.registerBot(tl1bot)
-      // botApi.registerBot(transbot)
       botApi.registerBot(fromToBot)
     } catch (e: TelegramApiException) {
       e.printStackTrace()
