@@ -13,7 +13,6 @@ class FromToBot : TelegramLongPollingBot() {
   @Autowired
   private lateinit var env: Environment
 
-
   override fun getBotToken(): String {
     return env.getProperty("fromtobot.bot.token")
   }
